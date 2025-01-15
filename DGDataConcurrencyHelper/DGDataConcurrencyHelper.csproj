@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net40;netstandard2</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <RootNamespace>DG.DataConcurrencyHelper</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyTitle>DGDataConcurrencyHelper</AssemblyTitle>
+    <Version>1.2.30115.0</Version>
+    <AssemblyVersion>1.2.30115.0</AssemblyVersion>
+    <FileVersion>1.2.30115.0</FileVersion>
+    <PackageVersion>1.2.30115.0</PackageVersion>
+    <Title>DGDataConcurrencyHelper</Title>
+    <Description>Helper library for data concurrency checks on .NET</Description>
+    <Product>DGDataConcurrencyHelper</Product>
+    <Authors>Davide Gironi</Authors>
+    <Company>DG</Company>
+    <RepositoryUrl>https://github.com/davidegironi/dgdataconcurrencyhelper</RepositoryUrl>
+    <PackageId>DG.DataConcurrencyHelper</PackageId>
+    <PackageTags>Concurrency, Helper, Generic, SQL</PackageTags>
+    <PackageProjectUrl>https://github.com/davidegironi/dgdataconcurrencyhelper</PackageProjectUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIcon>DGDataConcurrencyHelper_logo.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>Copyright (c) Davide Gironi, 2014</Copyright>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\License\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+    <None Include="..\README.md" Link="README.md">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+    <None Include="Resources\Images\DGDataConcurrencyHelper_logo.png">
+      <Pack>True</Pack>
+      <PackagePath>
+      </PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2'">
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.7" />
+  </ItemGroup>
+</Project>
