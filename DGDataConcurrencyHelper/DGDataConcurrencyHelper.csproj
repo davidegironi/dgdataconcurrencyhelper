@@ -5,10 +5,10 @@
     <RootNamespace>DG.DataConcurrencyHelper</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AssemblyTitle>DGDataConcurrencyHelper</AssemblyTitle>
-    <Version>1.2.30115.0</Version>
-    <AssemblyVersion>1.2.30115.0</AssemblyVersion>
-    <FileVersion>1.2.30115.0</FileVersion>
-    <PackageVersion>1.2.30115.0</PackageVersion>
+    <Version>1.2.30203.0</Version>
+    <AssemblyVersion>1.2.30203.0</AssemblyVersion>
+    <FileVersion>1.2.30203.0</FileVersion>
+    <PackageVersion>1.2.30203.0</PackageVersion>
     <Title>DGDataConcurrencyHelper</Title>
     <Description>Helper library for data concurrency checks on .NET</Description>
     <Product>DGDataConcurrencyHelper</Product>

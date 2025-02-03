@@ -20,6 +20,11 @@ namespace DG.DataConcurrencyHelper
     public class DGDataConcurrencyHelper
     {
         /// <summary>
+        /// Default table prefix
+        /// </summary>
+        public const string DefaultTablePrefix = "dch_";
+
+        /// <summary>
         /// private SqlConnection used by the instance
         /// </summary>
         private SqlConnection _sqlConnection = new SqlConnection();
@@ -30,25 +35,33 @@ namespace DG.DataConcurrencyHelper
         public enum Status { Editing, Viewing, Unknown };
 
         /// <summary>
+        /// Table prefix
+        /// </summary>
+        private string _tablePrefix = DefaultTablePrefix;
+
+        /// <summary>
         /// Build a DataConcurrencyHelper
         /// </summary>
         public DGDataConcurrencyHelper()
         { }
-        public DGDataConcurrencyHelper(SqlConnection sqlConnection)
+        public DGDataConcurrencyHelper(SqlConnection sqlConnection, string tablePrefix)
         {
             _sqlConnection = sqlConnection;
+            _tablePrefix = String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix;
         }
-        public DGDataConcurrencyHelper(string sqlConnectionString)
+        public DGDataConcurrencyHelper(string sqlConnectionString, string tablePrefix)
         {
             _sqlConnection.ConnectionString = sqlConnectionString;
+            _tablePrefix = String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix;
         }
 
         /// <summary>
         /// List all connection status
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <returns></returns>
-        public static IList<ConcurrencyRecord> List(SqlConnection sqlConnection)
+        public static IList<ConcurrencyRecord> List(SqlConnection sqlConnection, string tablePrefix)
         {
             List<ConcurrencyRecord> ret = new List<ConcurrencyRecord>();
 
@@ -74,7 +87,7 @@ SELECT
     concurrencyrecords_application,
     concurrencyrecords_logusername,
     concurrencyrecords_datetime
-FROM dch_concurrencyrecords
+FROM " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords
 ORDER BY concurrencyrecords_datetime DESC";
                 sql_rd1 = sql_cm1.ExecuteReader();
                 while (sql_rd1.Read())
@@ -106,16 +119,17 @@ ORDER BY concurrencyrecords_datetime DESC";
         }
         public IList<ConcurrencyRecord> List()
         {
-            return List(this._sqlConnection);
+            return List(this._sqlConnection, this._tablePrefix);
         }
 
         /// <summary>
         /// Find a connection status
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static ConcurrencyRecord Find(SqlConnection sqlConnection, int id)
+        public static ConcurrencyRecord Find(SqlConnection sqlConnection, string tablePrefix, int id)
         {
             ConcurrencyRecord ret = null;
 
@@ -141,7 +155,7 @@ SELECT
     concurrencyrecords_application,
     concurrencyrecords_logusername,
     concurrencyrecords_datetime
-FROM dch_concurrencyrecords
+FROM " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords
 WHERE concurrencyrecords_id = @concurrencyrecords_id";
                 sql_cm1.Parameters.Add("@concurrencyrecords_id", SqlDbType.Int).Value = id;
                 sql_rd1 = sql_cm1.ExecuteReader();
@@ -174,18 +188,19 @@ WHERE concurrencyrecords_id = @concurrencyrecords_id";
         }
         public ConcurrencyRecord Find(int id)
         {
-            return Find(this._sqlConnection, id);
+            return Find(this._sqlConnection, this._tablePrefix, id);
         }
 
         /// <summary>
         /// Find a connection status
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <param name="database"></param>
         /// <param name="table"></param>
         /// <param name="recordId"></param>
         /// <returns></returns>
-        public static ConcurrencyRecord Find(SqlConnection sqlConnection, string database, string table, string recordId)
+        public static ConcurrencyRecord Find(SqlConnection sqlConnection, string tablePrefix, string database, string table, string recordId)
         {
             ConcurrencyRecord ret = null;
 
@@ -211,7 +226,7 @@ SELECT
     concurrencyrecords_application,
     concurrencyrecords_logusername,
     concurrencyrecords_datetime
-FROM dch_concurrencyrecords
+FROM " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords
 WHERE
     concurrencyrecords_database = @concurrencyrecords_database AND
     concurrencyrecords_table = @concurrencyrecords_table AND
@@ -249,16 +264,17 @@ WHERE
         }
         public ConcurrencyRecord Find(string database, string table, string recordId)
         {
-            return Find(this._sqlConnection, database, table, recordId);
+            return Find(this._sqlConnection, this._tablePrefix, database, table, recordId);
         }
 
         /// <summary>
-        /// Purge connection status older than selected ours
+        /// Purge connection status older than selected hours
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <param name="hours"></param>
         /// <returns></returns>
-        public static int Purge(SqlConnection sqlConnection, int hours)
+        public static int Purge(SqlConnection sqlConnection, string tablePrefix, int hours)
         {
             int ret = 0;
 
@@ -274,7 +290,7 @@ WHERE
                 sql_cm1.Connection = sqlConnection;
                 sql_cm1.CommandType = CommandType.Text;
                 sql_cm1.CommandText = @"
-DELETE FROM dch_concurrencyrecords
+DELETE FROM " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords
 WHERE concurrencyrecords_datetime < DATEADD(hour, @hour, GETDATE());";
                 sql_cm1.Parameters.Add("@hour", SqlDbType.Int).Value = -hours;
                 ret = sql_cm1.ExecuteNonQuery();
@@ -290,18 +306,19 @@ WHERE concurrencyrecords_datetime < DATEADD(hour, @hour, GETDATE());";
         }
         public int PurgeConnectionsStatus(int hours)
         {
-            return Purge(this._sqlConnection, hours);
+            return Purge(this._sqlConnection, this._tablePrefix, hours);
         }
 
         /// <summary>
         /// Get the status of a connection record
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <param name="database"></param>
         /// <param name="table"></param>
         /// <param name="recordId"></param>
         /// <returns></returns>
-        public static Nullable<Status> GetStatus(SqlConnection sqlConnection, string database, string table, string recordId)
+        public static Nullable<Status> GetStatus(SqlConnection sqlConnection, string tablePrefix, string database, string table, string recordId)
         {
             Nullable<Status> ret = null;
 
@@ -319,7 +336,7 @@ WHERE concurrencyrecords_datetime < DATEADD(hour, @hour, GETDATE());";
                 sql_cm1.CommandType = CommandType.Text;
                 sql_cm1.CommandText = @"
 SELECT concurrencyrecords_status
-FROM dch_concurrencyrecords
+FROM " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords
 WHERE
     concurrencyrecords_database = @concurrencyrecords_database AND
     concurrencyrecords_table = @concurrencyrecords_table AND
@@ -347,13 +364,14 @@ WHERE
         }
         public Nullable<Status> GetStatus(string database, string table, string recordId)
         {
-            return GetStatus(this._sqlConnection, database, table, recordId);
+            return GetStatus(this._sqlConnection, this._tablePrefix, database, table, recordId);
         }
 
         /// <summary>
         /// Set the status of a connection record
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <param name="database"></param>
         /// <param name="table"></param>
         /// <param name="recordId"></param>
@@ -361,11 +379,11 @@ WHERE
         /// <param name="logUsername"></param>
         /// <param name="status"></param>
         /// <returns></returns>
-        public static bool SetStatus(SqlConnection sqlConnection, string database, string table, string recordId, string application, string logUsername, Status status)
+        public static bool SetStatus(SqlConnection sqlConnection, string tablePrefix, string database, string table, string recordId, string application, string logUsername, Status status)
         {
             bool ret = false;
 
-            Nullable<Status> actualAction = GetStatus(sqlConnection, database, table, recordId);
+            Nullable<Status> actualAction = GetStatus(sqlConnection, tablePrefix, database, table, recordId);
             if (actualAction != null)
             {
                 if ((Status)actualAction == Status.Editing)
@@ -384,7 +402,7 @@ WHERE
                 sql_cm1.Connection = sqlConnection;
                 sql_cm1.CommandType = CommandType.Text;
                 sql_cm1.CommandText = @"
-INSERT INTO dch_concurrencyrecords(
+INSERT INTO " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords(
     concurrencyrecords_status,
     concurrencyrecords_database,
     concurrencyrecords_table,
@@ -432,18 +450,19 @@ VALUES(
         }
         public bool SetStatus(string database, string table, string recordId, string application, string logUsername, Status status)
         {
-            return SetStatus(this._sqlConnection, database, table, recordId, application, logUsername, status);
+            return SetStatus(this._sqlConnection, this._tablePrefix, database, table, recordId, application, logUsername, status);
         }
 
         /// <summary>
         /// Reset a connection status, remove it
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <param name="database"></param>
         /// <param name="table"></param>
         /// <param name="recordId"></param>
         /// <returns></returns>
-        public static bool ResetStatus(SqlConnection sqlConnection, string database, string table, string recordId)
+        public static bool ResetStatus(SqlConnection sqlConnection, string tablePrefix, string database, string table, string recordId)
         {
             bool ret = false;
 
@@ -459,7 +478,7 @@ VALUES(
                 sql_cm1.Connection = sqlConnection;
                 sql_cm1.CommandType = CommandType.Text;
                 sql_cm1.CommandText = @"
-DELETE FROM dch_concurrencyrecords
+DELETE FROM " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords
 WHERE
     concurrencyrecords_database = @concurrencyrecords_database AND
     concurrencyrecords_table = @concurrencyrecords_table AND
@@ -483,16 +502,17 @@ WHERE
         }
         public bool ResetStatus(string database, string table, string recordId)
         {
-            return ResetStatus(this._sqlConnection, database, table, recordId);
+            return ResetStatus(this._sqlConnection, this._tablePrefix, database, table, recordId);
         }
 
         /// <summary>
         /// Remove a connection record
         /// </summary>
         /// <param name="sqlConnection"></param>
+        /// <param name="tablePrefix"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static bool Remove(SqlConnection sqlConnection, int id)
+        public static bool Remove(SqlConnection sqlConnection, string tablePrefix, int id)
         {
             bool ret = false;
 
@@ -508,7 +528,7 @@ WHERE
                 sql_cm1.Connection = sqlConnection;
                 sql_cm1.CommandType = CommandType.Text;
                 sql_cm1.CommandText = @"
-DELETE FROM dch_concurrencyrecords
+DELETE FROM " + (String.IsNullOrEmpty(tablePrefix) ? "" : tablePrefix) + @"concurrencyrecords
 WHERE
     concurrencyrecords_id = @concurrencyrecords_id";
                 sql_cm1.Parameters.Add("@concurrencyrecords_id", SqlDbType.Int).Value = id;
@@ -528,7 +548,7 @@ WHERE
         }
         public bool Remove(int id)
         {
-            return Remove(this._sqlConnection, id);
+            return Remove(this._sqlConnection, this._tablePrefix, id);
         }
 
         /// <summary>

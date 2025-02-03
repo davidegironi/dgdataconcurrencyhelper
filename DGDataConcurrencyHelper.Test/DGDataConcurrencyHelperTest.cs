@@ -27,7 +27,7 @@ namespace DG.DataConcurrencyHelper.Test
 
             Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
 
-            dataConcurrencyHelper = new DGDataConcurrencyHelper(ConfigurationManager.AppSettings["dgdataconcurrencyhelperConnectionString"]);
+            dataConcurrencyHelper = new DGDataConcurrencyHelper(ConfigurationManager.AppSettings["dgdataconcurrencyhelperConnectionString"], DGDataConcurrencyHelper.DefaultTablePrefix);
 
             CleanTestData();
         }
