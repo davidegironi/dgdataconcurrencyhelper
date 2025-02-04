@@ -8,6 +8,9 @@
     <AssemblyVersion>1.2.30203.0</AssemblyVersion>
     <FileVersion>1.2.30203.0</FileVersion>
   </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net40" Version="1.0.3" PrivateAssets="All"/>
+  </ItemGroup>
   <ItemGroup>
     <None Update="App.Debug.config">
       <DependentUpon>App.config</DependentUpon>
